@@ -2,7 +2,7 @@
 # Generador de Resultados de Votaciones Legislativas
 
 Este script en Python procesa archivos de votaciones de diputados y senadores de Argentina para generar archivos JSON estructurados. Estos archivos se utilizan en el proyecto de visualización interactiva de votaciones en formato de hemiciclo:  
-🔗 [Visualización de Votaciones - Frontend](https://github.com/tu-usuario/repositorio-frontend)
+🔗 [Visualización de Votaciones - Frontend](https://github.com/DiFioreSantiago/voting-hemicycle-widget)
 
 ---
 
@@ -39,7 +39,7 @@ pip install pandas openpyxl
 
 ## 🚀 Cómo usar
 
-1. De las paginas oficiales de [Votaciones de la Camara de Diputados](https://votaciones.hcdn.gob.ar/) y [Votaciones de la Camara de Senadores](https://www.senado.gob.ar/votaciones/actas) los archivos para un proyecto de ley deseado. Por lo general el titulo para buscar el proyecto coincicide tanto en el sitio Diputados como en el de Senadores. Una vez descargados (para Diputados sera un archivo .csv y para Senadores un .xlsx) se deberan renombrar como `Votacion_Diputados.csv` y `Votacion_Senadores.xlsx` correspondientemente.
+1. De las paginas oficiales de [Votaciones de la Camara de Diputados](https://votaciones.hcdn.gob.ar/) y [Votaciones de la Camara de Senadores](https://www.senado.gob.ar/votaciones/actas) descargar los archivos para un proyecto de ley deseado. Por lo general el titulo para buscar el proyecto coincicide tanto en el sitio Diputados como en el de Senadores. Una vez descargados (para Diputados sera un archivo .csv y para Senadores un .xlsx) se deberan renombrar como `Votacion_Diputados.csv` y `Votacion_Senadores.xlsx` correspondientemente.
 
 2. Colocá en la raíz del proyecto los archivos:
 
