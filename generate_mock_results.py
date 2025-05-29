@@ -3,6 +3,7 @@ import json
 import pandas as pd
 from collections import defaultdict
 import re
+import os
 
 # Archivos de entrada
 DIPUTADOS_CSV_PATH = 'Votacion_Diputados.csv'
@@ -34,7 +35,7 @@ VOTO_COLOURS = {
     'AUSENTE': '#607D8B'
 }
 
-# Colores por partido - Diputados
+# Colores por partido
 PARTIDO_COLOURS_DIPUTADOS = {
     'Union Por La Patria': '#118CEF',
     'Pro': '#F9A825',
@@ -43,7 +44,6 @@ PARTIDO_COLOURS_DIPUTADOS = {
     'Otros': '#9E9E9E'
 }
 
-# Colores por partido - Senadores
 PARTIDO_COLOURS_SENADORES = {
     'La Libertad Avanza': '#8E24AA',
     'Frente Nacional Y Popular': '#1976D2',
@@ -53,7 +53,6 @@ PARTIDO_COLOURS_SENADORES = {
     'Otros': '#B0BEC5'
 }
 
-# Reemplazos para unificar nombres de bloques en Diputados
 PARTY_REPLACEMENTS_DIPUTADOS = {
     'Pts-frente De Izquierda Unidad': 'Frente De Izquierda Unidad',
     'Partido Obrero -frente De Izquierda Y De Trabajadores -unidad': 'Frente De Izquierda Unidad',
@@ -63,7 +62,10 @@ PARTY_REPLACEMENTS_DIPUTADOS = {
 # 1. Procesar diputados
 diputados_df = pd.read_csv(DIPUTADOS_CSV_PATH)
 diputados_data = []
+
 for _, row in diputados_df.iterrows():
+    if pd.isna(row["¿CÓMO VOTÓ?"]):
+        continue
     nombre = row['DIPUTADO']
     bloque = PARTY_REPLACEMENTS_DIPUTADOS.get(row['BLOQUE'], row['BLOQUE'])
     diputados_data.append({
@@ -77,23 +79,24 @@ for _, row in diputados_df.iterrows():
 with open(DIPUTADOS_PATH, 'w', encoding='utf-8') as f:
     json.dump(diputados_data, f, indent=4, ensure_ascii=False)
 
-# 2. Procesar senadores
-senadores_df = pd.read_excel(SENADORES_XLSX_PATH, skiprows=5)
+# 2. Procesar senadores si el archivo existe
 senadores_data = []
-for _, row in senadores_df.iterrows():
-    if pd.notna(row.get("Senador")):
-        nombre = row["Senador"]
-        bloque = to_camel_case(row["Bloque"])
-        senadores_data.append({
-            "SENADOR": nombre,
-            "BLOQUE": bloque,
-            "PROVINCIA": row["Provincia"],
-            "VOTO": row["¿Cómo votó?"],
-            "FOTO": format_name_for_photo(nombre, "senador")
-        })
+if os.path.exists(SENADORES_XLSX_PATH):
+    senadores_df = pd.read_excel(SENADORES_XLSX_PATH, skiprows=5)
+    for _, row in senadores_df.iterrows():
+        if pd.notna(row.get("Senador")) and pd.notna(row.get("¿Cómo votó?")):
+            nombre = row["Senador"]
+            bloque = to_camel_case(row["Bloque"])
+            senadores_data.append({
+                "SENADOR": nombre,
+                "BLOQUE": bloque,
+                "PROVINCIA": row["Provincia"],
+                "VOTO": row["¿Cómo votó?"],
+                "FOTO": format_name_for_photo(nombre, "senador")
+            })
 
-with open(SENADORES_PATH, 'w', encoding='utf-8') as f:
-    json.dump(senadores_data, f, indent=4, ensure_ascii=False)
+    with open(SENADORES_PATH, 'w', encoding='utf-8') as f:
+        json.dump(senadores_data, f, indent=4, ensure_ascii=False)
 
 # 3. Función para calcular totales
 def generar_totales(data, key_bloque, partidos_colores, main_parties):
@@ -125,11 +128,19 @@ def generar_totales(data, key_bloque, partidos_colores, main_parties):
 
 # 4. Generar mockResults.json
 mock_results = {
-    "diputados": generar_totales(diputados_data, 'BLOQUE', PARTIDO_COLOURS_DIPUTADOS, set(PARTIDO_COLOURS_DIPUTADOS) - {'Otros'}),
-    "senadores": generar_totales(senadores_data, 'BLOQUE', PARTIDO_COLOURS_SENADORES, set(PARTIDO_COLOURS_SENADORES) - {'Otros'})
+    "diputados": generar_totales(diputados_data, 'BLOQUE', PARTIDO_COLOURS_DIPUTADOS, set(PARTIDO_COLOURS_DIPUTADOS) - {'Otros'})
 }
+if senadores_data:
+    mock_results["senadores"] = generar_totales(senadores_data, 'BLOQUE', PARTIDO_COLOURS_SENADORES, set(PARTIDO_COLOURS_SENADORES) - {'Otros'})
 
 with open(OUTPUT_PATH, 'w', encoding='utf-8') as f:
     json.dump(mock_results, f, indent=4, ensure_ascii=False)
 
-print("Archivo generado exitosamente: votacionDiputados.json, votacionSenadores.json y mockResults.json")
+print("Archivo generado exitosamente:")
+if senadores_data:
+    print("- votacionDiputados.json")
+    print("- votacionSenadores.json")
+    print("- mockResults.json")
+else:
+    print("- votacionDiputados.json")
+    print("- mockResults.json (solo diputados)")

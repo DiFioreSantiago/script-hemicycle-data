@@ -46,6 +46,13 @@ pip install pandas openpyxl
    - `Votacion_Diputados.csv`
    - `Votacion_Senadores.xlsx`
 
+> 📝 **Nota:**  
+> Como el proceso legislativo suele iniciar en la Cámara de Diputados, es posible que al momento de correr el script aún no exista el archivo correspondiente a la votación en el Senado.  
+>  
+> Para contemplar ese escenario, el script está preparado para funcionar aunque no se haya cargado `Votacion_Senadores.xlsx`.  
+> En ese caso, solo se generarán los archivos `votacionDiputados.json` y `mockResults.json` con los datos de Diputados, permitiendo avanzar en la visualización parcial sin necesidad de modificar el código ni desplegar nuevamente la API.
+
+
 3. Ejecutá el script:
 
 ```bash
